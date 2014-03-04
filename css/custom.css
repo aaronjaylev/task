@@ -1,0 +1,11 @@
+body { 
+	padding-top: 40px; 
+}
+
+.ui-front {
+    z-index: 1500;
+}
+
+.completed-task {
+	text-decoration: line-through;
+}
