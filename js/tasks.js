@@ -1,3 +1,37 @@
+/**
+* SageTask.com
+*
+* SageTask.com is a Website, API, and SDK for Creating and Managing simple tasks.
+*
+* This code is visible on http://www.sagetask.com.  It is a "one page" website
+* and uses JQuery, JQueryUI, Twitter Bootstrap to format the pages.  Connection
+* to the MySQL database is done through an API which can also be called directly.
+* I hope you enjoy viewing, using and learning from this code.  You may use it for 
+* your own projects if you give me credit by leaving this license notification 
+* in your files.  Happy Coding.  Aaron Jay
+*
+* @package SageTask
+* @author Aaron Jay Lev <aaronjaylev@gmail.com>
+* @copyright Copyright (c) 2014, Aaron Jay Lev
+* @link http://www.sagetask.com
+* @example http://www.sagetask.com/
+* @license http://www.apache.org/licenses/LICENSE-2.0
+*
+* Copyright 2014 Aaron Jay Lev
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
 $(function() {
 	$("#TaskDialog").dialog({
 		autoOpen: false,
@@ -25,7 +59,7 @@ $(function() {
 		zIndex: 1500,
 		buttons: {
 			"Register": function() {
-				RegisterEmail();
+				var ErrorMsg = RegisterEmail();
 				$(this).dialog("close");
 			},
 			Cancel: function() {
@@ -34,7 +68,7 @@ $(function() {
 		}
 	});
 
-	$("#Register-Message, #Error-Message").dialog({
+	$("div#Register-Message, div#Error-Message, div#Info-Message").dialog({
 		autoOpen: false,
 		height: 200,
 		width: 600,
@@ -49,7 +83,7 @@ $(function() {
 	
 	$("div#SignIn").dialog({
 		autoOpen: false,
-		height: 250,
+		height: 300,
 		width: 600,
 		modal: true,
 		zIndex: 1500,
@@ -60,10 +94,29 @@ $(function() {
 			},
 			Cancel: function() {
 				$(this).dialog("close");
+			},
+			"Forgot my Password": function() {
+				$("div#Forgot").dialog("open");
+				$(this).dialog("close");
 			}
 		}
 	});
 	
+	$("div#Forgot").dialog({
+		autoOpen: false,
+		height: 250,
+		width: 600,
+		modal: true,
+		zIndex: 1500,
+		buttons: {
+			"Reset My Password": function() {
+				ResetPassword();
+			},
+			Cancel: function() {
+				$(this).dialog("close");
+			}
+		}
+	});
 	LoginCheck();
 });
 
@@ -74,24 +127,48 @@ function ShowTask(TaskID) {
 		$('span#ui-id-1').html('Update Task');
 	}
 	$('td#ShowTaskID').html('<b>' + TaskID + '</b>');
-	$.getJSON("/js/task-info.php", {"TaskID": TaskID}, function(data) {
-		$('div#TaskDialog input#TaskID')[0].value = TaskID;
-		$('div#TaskDialog input#Title')[0].value = data.Title;
-		$('div#TaskDialog input#DueDate')[0].value = data.DueDate;
-		$('div#TaskDialog input#DueDate').datepicker();
-		$('div#TaskDialog textarea#Description')[0].value = data.Description;
+	info = new Object();
+	info['Action'] = 'TaskInfo';
+	info['Email'] = $.cookie("Email");
+	info['Password'] = $.cookie("Password");
+	info['TaskID'] = TaskID;
 
-		$('div#TaskDialog select#Priority').html('');
-		$.each(data["PriorityValues"], function(key, value) {
-			var Selected = (value == data["Priority"] ? " selected" : ""); 
-			$('div#TaskDialog select#Priority').append('<option' + Selected + '>' + value + '</option>');
-		});
-		$("#TaskDialog").dialog("open");
+	$.ajax({
+		type: 'POST',
+		url: '/api/sagetask-api.php',
+		async: false,
+		data: JSON.stringify(info),
+		dataType: 'json',
+		processData: false,
+        contentType: "application/json",
+        success: function(data) {
+        	if (data.ErrorMsg != '') {
+        	    $('div#Error-Message span#ErrorMsg').html(data.ErrorMsg);
+        		$("div#Error-Message").dialog("open");
+        		getTaskTable();
+        	} else {
+				$('div#TaskDialog input#TaskID')[0].value = data.Data.TaskID;
+				$('div#TaskDialog input#Title')[0].value = data.Data.Title;
+				$('div#TaskDialog input#DueDate')[0].value = data.Data.DueDate;
+				$('div#TaskDialog input#DueDate').datepicker();
+				$('div#TaskDialog textarea#Description')[0].value = data.Data.Description;
+
+				$('div#TaskDialog select#Priority').html('');
+				$.each(data.Data["PriorityValues"], function(key, value) {
+					var Selected = (value == data["Priority"] ? " selected" : ""); 
+					$('div#TaskDialog select#Priority').append('<option' + Selected + '>' + value + '</option>');
+				});
+				$("#TaskDialog").dialog("open");
+			}
+		}
 	});
 }
 
 function SaveTask() {
 	info = new Object();
+	info['Action'] = 'TaskSave';
+	info['Email'] = $.cookie("Email");
+	info['Password'] = $.cookie("Password");
 	info['TaskID'] = $('div#TaskDialog input#TaskID')[0].value;
 	info['Title'] = $('div#TaskDialog input#Title')[0].value;
 	info['Description'] = $('div#TaskDialog textarea#Description')[0].value;
@@ -99,26 +176,50 @@ function SaveTask() {
 	info['Priority'] = $('div#TaskDialog select#Priority')[0].value;
 	$.ajax({
 		type: 'POST',
-		url: '/js/task-save.php',
-		data: info,
-		async: false
+		url: '/api/sagetask-api.php',
+		async: false,
+		data: JSON.stringify(info),
+		dataType: 'json',
+		processData: false,
+        contentType: "application/json",
+        success: function(data) {
+			if (data.ErrorMsg != '') {
+        	    $('div#Error-Message span#ErrorMsg').html(data.ErrorMsg);
+        		$("div#Error-Message").dialog("open");
+        	}
+        }
 	});
 }
 
 function TaskStatus(TaskID, NewStatus) {
 	info = new Object();
+	info['Action'] = 'TaskStatus';
+	info['Email'] = $.cookie("Email");
+	info['Password'] = $.cookie("Password");
 	info['TaskID'] = TaskID;
 	info['Status'] = NewStatus;
+	
 	$.ajax({
 		type: 'POST',
-		url: '/js/task-status.php',
-		data: info,
+		url: '/api/sagetask-api.php',
 		async: false,
-	}).done(getTaskTable());
+		data: JSON.stringify(info),
+		dataType: 'json',
+		processData: false,
+        contentType: "application/json",
+        success: function(data) {
+			if (data.ErrorMsg != '') {
+        	    $('div#Error-Message span#ErrorMsg').html(data.ErrorMsg);
+        		$("div#Error-Message").dialog("open");
+        	} else {
+        		getTaskTable();	
+        	}
+        }
+    });
 }
 
 function Register() {
-	$("#Register").dialog("open");
+	$("div#Register").dialog("open");
 }
 
 function RegisterEmail() {
@@ -136,10 +237,10 @@ function RegisterEmail() {
         contentType: "application/json",
         success: function(data) {
         	if (data.ErrorMsg == "") {
-        		$("#Register-Message").dialog("open");
+        		$("div#Register-Message").dialog("open");
         	} else {
         		$('div#Error-Message span#ErrorMsg').html(data.ErrorMsg);
-        		$("#Register-Error").dialog("open");
+        		$("div#Error-Message").dialog("open");
 			}
 		}
 	});
@@ -162,7 +263,11 @@ function SignInEmail() {
         	if (data.ErrorMsg == "") {
         		$.cookie("Email", info['Email'], { path: '/' });
         		$.cookie("Password", info['Password'], { path: '/' });
-        		alert('success');
+        		
+        		SignInCheck();
+        		
+				$('div#Info-Message').dialog("open");
+				$('div#Info-Message span#InfoMsg').html("You are logged in.  You may view and manage your tasks now.");
         	} else {
         		$('div#Error-Message span#ErrorMsg').html('Invalid Email / Password Combination');
         		$("#Error-Message").dialog("open");
@@ -198,6 +303,30 @@ function SignInCheck() {
 	});
 }
 
+function ResetPassword() {
+	info = new Object();
+	info['Action'] = 'Forgot';
+	info['Email'] = $('div#Forgot input#Email')[0].value;
+	$.ajax({
+		type: 'POST',
+		url: '/api/sagetask-api.php',
+		async: false,
+		data: JSON.stringify(info),
+		dataType: 'json',
+		processData: false,
+        contentType: "application/json",
+        success: function(data) {
+        	if (data.ErrorMsg == "") {
+        		$('div#SignIn span#InfoMsg').html('A new password has been emailed to you.');
+        		$("div#SignIn").dialog("open");
+        		$("div#Forgot").dialog("close");
+        	} else {
+        		$('div#Forgot span#ErrorMsg').html(data.ErrorMsg);
+			}
+		}
+	});
+}
+
 function SignIn() {
 	$("div#SignIn").dialog("open");
 }
@@ -214,6 +343,7 @@ function LoginShow(Name) {
 	}
 	$('li#Logout').removeClass("hidden");
 	$('button#AddTask').removeClass("hidden");
+	$('div#Intro').addClass("hidden");
 	$('div#TaskTable').load(getTaskTable());
 }
 
@@ -252,6 +382,7 @@ function Logout() {
 	$('li#Profile').addClass("hidden");
 	$('li#Logout').addClass("hidden");
 	$('button#AddTask').addClass("hidden");
+	$('div#Intro').removeClass("hidden");
 	$('div#TaskTable').html('');
 }
 

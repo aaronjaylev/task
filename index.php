@@ -1,3 +1,40 @@
+<?php
+
+/**
+* SageTask.com
+*
+* SageTask.com is a Website, API, and SDK for Creating and Managing simple tasks.
+*
+* This code is visible on http://www.sagetask.com.  It is a "one page" website
+* and uses JQuery, JQueryUI, Twitter Bootstrap to format the pages.  Connection
+* to the MySQL database is done through an API which can also be called directly.
+* I hope you enjoy viewing, using and learning from this code.  You may use it for 
+* your own projects if you give me credit by leaving this license notification 
+* in your files.  Happy Coding.  Aaron Jay
+*
+* @package SageTask
+* @author Aaron Jay Lev <aaronjaylev@gmail.com>
+* @copyright Copyright (c) 2014, Aaron Jay Lev
+* @link http://www.sagetask.com
+* @example http://www.sagetask.com/
+* @license http://www.apache.org/licenses/LICENSE-2.0
+*
+* Copyright 2014 Aaron Jay Lev
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -47,6 +84,22 @@
 
 <div class="container" style="padding-top: 20px;">	
 	<div id="TaskTable"></div>
+	<div id="Intro">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+			    <h3 class="panel-title">Welcome to SageTask.com</h3>
+		  	</div>
+			<div class="panel-body">
+				<p>Welcome to SageTask.com.  Your simple, easy and free easy task manager.</p>
+				<p>To get started, please click the &quot;Register&quot; button at the top of the screen.</p>
+				<p>After you complete the Register screen, a password will be emailed to you.</p>
+				<p>Then click the &quot;Login&quot; button to start keeping track of your tasks</p>
+				<p>We will set a cookie on your computer, so you will not have to login again.  You will just
+				have to return to this website, to see and manage your tasks</p>
+				<p>Enjoy!</p>
+			</div>
+		</div>
+	</div>
 </div>
 
 <nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
@@ -88,11 +141,29 @@
 	<span id="ErrorMsg"></span></p>
 </div>
 
+<div id="Info-Message" title="Info Message">
+	<p>
+		<span class="ui-icon ui-icon-info" style="float:left; margin:0 7px 50px 0;"></span>
+		<span id="InfoMsg"></span>
+	</p>
+</div>
+
 <div id="SignIn" title="Sign In for Sage Task">
 	<form>
 		<table class="table">
 			<tr><td>Your Email:</td><td><input maxlength="100" size="40" id="Email" value=""></td></tr>
 			<tr><td>Password:</td><td><input type="password" maxlength="20" size="20" id="Password" value=""></td></tr>
+		</table>
+		<p><span id="InfoMsg"></span></p>
+	</form>
+</div>
+
+<div id="Forgot" title="Forgot my Password">
+	<form>
+		<table class="table">
+			<tr><td colspan="2">Enter your Email to have a new password Emailed to you</td></tr>
+			<tr><td>Your Email:</td><td><input maxlength="100" size="40" id="Email" value=""></td></tr>
+			<tr><td colspan="2"><span id="ErrorMsg"></span></td></tr>
 		</table>
 	</form>
 </div>

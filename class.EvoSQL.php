@@ -13,7 +13,7 @@
  * @author    Aaron Jay Lev <aaronjaylev@gmail.com>
  * @copyright Copyright (c) 2013, Aaron Jay Lev
  * @example   http://www.aaronjay.com/EvoSQL
- * @link      http://www.aaronjay.com 
+ * @link      https://github.com/aaronjay/EvoSQL/ 
  * @license   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Copyright 2013 Aaron Jay Lev
